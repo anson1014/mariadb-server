@@ -164,12 +164,10 @@ get_keys()
         exit 3
     fi
 
-    if [ -z "$ekey" ]; then
-        if [ ! -r "$ekeyfile" ]; then
-            wsrep_log_error "FATAL: Either key must be specified" \
-                            "or keyfile must be readable"
-            exit 3
-        fi
+    if [ -z "$ekey" -a ! -r "$ekeyfile" ]; then
+        wsrep_log_error "FATAL: Either key must be specified" \
+                        "or keyfile must be readable"
+        exit 3
     fi
 
     if [ "$eformat" = 'openssl' ]; then
@@ -410,7 +408,10 @@ get_transfer()
         fi
 
         tcmd="$tcmd$CN_option$sockopt"
-        [ "$WSREP_SST_OPT_ROLE" = 'joiner' ] && tcmd="$tcmd stdio"
+
+        if [ "$WSREP_SST_OPT_ROLE" = 'joiner' ]; then
+            tcmd="$tcmd stdio"
+        fi
     fi
 }
 
@@ -678,7 +679,7 @@ cleanup_at_exit()
     fi
 
     # Final cleanup
-    pgid=$(ps -o pgid= $$ 2>/dev/null | grep -o -E '[0-9]*' || :)
+    pgid=$(ps -o pgid= $$ 2>/dev/null | grep -o -E '[0-9]+' || :)
 
     # This means no setsid done in mysqld.
     # We don't want to kill mysqld here otherwise.
@@ -807,7 +808,6 @@ recv_joiner()
             wsrep_log_info $(ls -l "$dir/"*)
             exit 32
         fi
-
         # Select the "secret" tag whose value does not start
         # with a slash symbol. All new tags must to start with
         # the space and the slash symbol after the word "secret" -
@@ -1248,7 +1248,7 @@ else # joiner
     [ -f "$DATA/$IST_FILE" ] && rm -f "$DATA/$IST_FILE"
 
     # May need xtrabackup_checkpoints later on
-    [ -f "$DATA/xtrabackup_binary"      ] && rm -f "$DATA/xtrabackup_binary"
+    [ -f "$DATA/xtrabackup_binary" ]      && rm -f "$DATA/xtrabackup_binary"
     [ -f "$DATA/xtrabackup_galera_info" ] && rm -f "$DATA/xtrabackup_galera_info"
 
     ADDR="$WSREP_SST_OPT_HOST"
@@ -1332,13 +1332,13 @@ else # joiner
             cd "$DATA"
             wsrep_log_info "Cleaning the old binary logs"
             # If there is a file with binlogs state, delete it:
-            [ -f "$binlog_base.state" ] && rm -fv "$binlog_base.state" 1>&2
+            [ -f "$binlog_base.state" ] && rm -f "$binlog_base.state" >&2
             # Clean up the old binlog files and index:
             if [ -f "$binlog_index" ]; then
                 while read bin_file || [ -n "$bin_file" ]; do
-                    rm -fv "$bin_file" 1>&2 || :
+                    rm -f "$bin_file" >&2 || :
                 done < "$binlog_index"
-                rm -fv "$binlog_index" 1>&2
+                rm -f "$binlog_index" >&2
             fi
             if [ -n "$binlog_dir" -a "$binlog_dir" != '.' -a \
                  -d "$binlog_dir" ]
@@ -1349,7 +1349,7 @@ else # joiner
                        "Cleaning the binlog directory '$binlog_dir' as well"
                 fi
             fi
-            rm -fv "$binlog_base".[0-9]* 1>&2 || :
+            rm -f "$binlog_base".[0-9]* >&2 || :
             cd "$OLD_PWD"
         fi
 
@@ -1360,13 +1360,13 @@ else # joiner
                     ${ib_undo_dir:+"$ib_undo_dir"} \
                     ${ib_log_dir:+"$ib_log_dir"} \
                     "$DATA" -mindepth 1 -prune -regex "$cpat" \
-                    -o -exec rm -rfv {} 1>&2 \+
+                    -o -exec rm -rf {} >&2 \+
         else
             find ${ib_home_dir:+"$ib_home_dir"} \
                  ${ib_undo_dir:+"$ib_undo_dir"} \
                  ${ib_log_dir:+"$ib_log_dir"} \
                  "$DATA" -mindepth 1 -prune -regex "$cpat" \
-                 -o -exec rm -rfv {} 1>&2 \+
+                 -o -exec rm -rf {} >&2 \+
         fi
 
         TDATA="$DATA"

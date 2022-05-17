@@ -368,7 +368,7 @@ while check_pid "$RSYNC_PID" 1 "$RSYNC_CONF"; do
     sleep 1
 done
 
-[ -f "$MAGIC_FILE"      ] && rm -f "$MAGIC_FILE"
+[ -f "$MAGIC_FILE" ]      && rm -f "$MAGIC_FILE"
 [ -f "$BINLOG_TAR_FILE" ] && rm -f "$BINLOG_TAR_FILE"
 
 if [ "$WSREP_SST_OPT_ROLE" = 'donor' ]; then
@@ -400,7 +400,7 @@ EOF
         ERROR="$WSREP_SST_OPT_DATA/sst_error"
 
         [ -f "$FLUSHED" ] && rm -f "$FLUSHED"
-        [ -f "$ERROR"   ] && rm -f "$ERROR"
+        [ -f "$ERROR" ]   && rm -f "$ERROR"
 
         echo 'flush tables'
 
@@ -410,7 +410,7 @@ EOF
         # (c) ERROR file, in case flush tables operation failed.
 
         while [ ! -r "$FLUSHED" ] && \
-                ! grep -q -F ':' '--' "$FLUSHED" >/dev/null 2>&1
+                ! grep -q -F ':' -- "$FLUSHED" 2>/dev/null
         do
             # Check whether ERROR file exists.
             if [ -f "$ERROR" ]; then
@@ -450,7 +450,7 @@ EOF
                     tar_type=0
                     if tar --help | grep -qw -F -- '--transform'; then
                         tar_type=1
-                    elif tar --version | grep -q -E '^bsdtar\>'; then
+                    elif tar --version | grep -qw -E '^bsdtar'; then
                         tar_type=2
                     fi
                     if [ $tar_type -eq 2 ]; then
@@ -666,7 +666,7 @@ FILTER="-f '- /lost+found'
 
     if [ -n "$STUNNEL" ]; then
         [ -f "$STUNNEL_CONF" ] && rm -f "$STUNNEL_CONF"
-        [ -f "$STUNNEL_PID"  ] && rm -f "$STUNNEL_PID"
+        [ -f "$STUNNEL_PID" ]  && rm -f "$STUNNEL_PID"
     fi
 
 else # joiner
@@ -903,7 +903,7 @@ EOF
             # Extracting binlog files:
             wsrep_log_info "Extracting binlog files:"
             RC=0
-            if tar --version | grep -q -E '^bsdtar\>'; then
+            if tar --version | grep -qw -E '^bsdtar'; then
                 tar -tf "$BINLOG_TAR_FILE" > "$tmpfile" && \
                 tar -xvf "$BINLOG_TAR_FILE" > /dev/null || RC=$?
             else
@@ -911,8 +911,8 @@ EOF
                 cat "$tmpfile" >&2 || RC=$?
             fi
             if [ $RC -ne 0 ]; then
-                rm -f "$tmpfile"
                 wsrep_log_error "Error unpacking tar file with binlog files"
+                rm -f "$tmpfile"
                 exit 32
             fi
             # Rebuild binlog index:

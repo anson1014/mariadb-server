@@ -64,7 +64,7 @@ then
         [ -f "$FLUSHED" ] && rm -f "$FLUSHED"
         [ -f "$ERROR"   ] && rm -f "$ERROR"
 
-         echo "flush tables"
+        echo "flush tables"
 
         # Wait for :
         # (a) Tables to be flushed, AND
@@ -72,7 +72,7 @@ then
         # (c) ERROR file, in case flush tables operation failed.
 
         while [ ! -r "$FLUSHED" ] && \
-                ! grep -q -F ':' '--' "$FLUSHED" >/dev/null 2>&1
+                ! grep -q -F ':' -- "$FLUSHED" >/dev/null 2>&1
         do
             # Check whether ERROR file exists.
             if [ -f "$ERROR" ]; then
