@@ -30,13 +30,13 @@ C_MODE_START
 extern MYSQL_PLUGIN_IMPORT ulonglong log_10_int[20];
 extern uchar days_in_month[];
 
-#define MY_TIME_T_MAX LONG_MAX
-#define MY_TIME_T_MIN LONG_MIN
+#define MY_TIME_T_MAX LONGLONG_MAX
+#define MY_TIME_T_MIN LONGLONG_MIN
 
 /* Time handling defaults */
-#define TIMESTAMP_MAX_YEAR 2038
+#define TIMESTAMP_MAX_YEAR 9999
 #define TIMESTAMP_MIN_YEAR (1900 + YY_PART_YEAR - 1)
-#define TIMESTAMP_MAX_VALUE INT_MAX32
+#define TIMESTAMP_MAX_VALUE INT_MAX64
 #define TIMESTAMP_MIN_VALUE 0
 
 /* two-digit years < this are 20..; >= this are 19.. */
@@ -46,7 +46,7 @@ extern uchar days_in_month[];
   check for valid times only if the range of time_t is greater than
   the range of my_time_t
 */
-#if SIZEOF_TIME_T > 4 || defined(TIME_T_UNSIGNED)
+#if SIZEOF_TIME_T > 8 || defined(TIME_T_UNSIGNED)
 # define IS_TIME_T_VALID_FOR_TIMESTAMP(x) \
     ((x) <= TIMESTAMP_MAX_VALUE && \
      (x) >= TIMESTAMP_MIN_VALUE)

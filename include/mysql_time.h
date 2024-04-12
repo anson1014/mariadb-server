@@ -25,7 +25,7 @@
   Using the system built in time_t is not an option as
   we rely on the above requirements in the time functions   
 */
-typedef long my_time_t;
+typedef long long my_time_t;
 
 
 /*

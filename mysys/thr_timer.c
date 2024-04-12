@@ -36,7 +36,7 @@ static QUEUE timer_queue;
 pthread_t timer_thread;
 
 #define set_max_time(abs_time) \
-  { (abs_time)->MY_tv_sec= INT_MAX32; (abs_time)->MY_tv_nsec= 0; }
+  { (abs_time)->MY_tv_sec= INT_MAX64; (abs_time)->MY_tv_nsec= 0; }
 
 
 static void *timer_handler(void *arg __attribute__((unused)));
